@@ -7,10 +7,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class TracerPreparedStatement extends AbstractStatement implements InvocationHandler {
@@ -68,7 +66,7 @@ public class TracerPreparedStatement extends AbstractStatement implements Invoca
                 return method.invoke(this, params);
             }
             if (EXECUTE_METHODS.contains(method.getName())) {
-                if ("executeQuery".equals(method.getName())) {
+                if ("executeQuery".equals(method.getName()) && resultSetListener != null) {
                     return trace(() -> {
                         ResultSet rs = (ResultSet) method.invoke(statement, params);
                         return rs == null ? null : TracerResultSet.newInstance(rs, resultSetListener);
@@ -80,9 +78,9 @@ public class TracerPreparedStatement extends AbstractStatement implements Invoca
                 }
             } else if (SET_METHODS.contains(method.getName())) {
                 if ("setNull".equals(method.getName())) {
-                    setColumn((int)params[0], null);
+                    setColumn((int) params[0], null);
                 } else {
-                    setColumn((int)params[0], params[1]);
+                    setColumn((int) params[0], params[1]);
                 }
                 return method.invoke(statement, params);
             } else if ("getResultSet".equals(method.getName())) {

@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.List;
 
 public class TracerStatement extends AbstractStatement implements InvocationHandler {
     private final ResultSetListener resultSetListener;
@@ -34,7 +33,7 @@ public class TracerStatement extends AbstractStatement implements InvocationHand
                 return method.invoke(this, params);
             }
             if (EXECUTE_METHODS.contains(method.getName())) {
-                if ("executeQuery".equals(method.getName())) {
+                if ("executeQuery".equals(method.getName()) && resultSetListener != null) {
                     return trace(() -> {
                         ResultSet rs = (ResultSet) method.invoke(statement, params);
                         return rs == null ? null : TracerResultSet.newInstance(rs, resultSetListener);
@@ -44,7 +43,7 @@ public class TracerStatement extends AbstractStatement implements InvocationHand
                         return method.invoke(statement, params);
                     });
                 }
-            } else if ("getResultSet".equals(method.getName())) {
+            } else if ("getResultSet".equals(method.getName()) && resultSetListener != null) {
                 ResultSet rs = (ResultSet) method.invoke(statement, params);
                 return rs == null ? null : TracerResultSet.newInstance(rs, resultSetListener);
             } else if ("equals".equals(method.getName())) {
