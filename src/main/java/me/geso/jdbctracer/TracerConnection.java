@@ -4,17 +4,18 @@ import me.geso.jdbctracer.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Objects;
 
-class TracerConnectionInter implements InvocationHandler {
+class TracerConnection implements InvocationHandler {
     private Connection connection;
     private final PreparedStatementListener preparedStatementListener;
     private final ResultSetListener resultSetListener;
 
-    TracerConnectionInter(Connection connection, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+    TracerConnection(Connection connection, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         this.connection = Objects.requireNonNull(connection);
         this.preparedStatementListener = preparedStatementListener;
         this.resultSetListener = resultSetListener;
@@ -28,15 +29,14 @@ class TracerConnectionInter implements InvocationHandler {
             }
             if ("prepareStatement".equals(method.getName())) {
                 PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
-                stmt = TracerPreparedStatement.newInstance(stmt, (String) params[0], preparedStatementListener, resultSetListener);
-                return stmt;
+                return TracerPreparedStatement.newInstance(PreparedStatement.class, stmt, (String) params[0], preparedStatementListener, resultSetListener);
             } else if ("prepareCall".equals(method.getName())) {
                 PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
-                stmt = TracerPreparedStatement.newInstance(stmt, (String) params[0], preparedStatementListener, resultSetListener);
+                stmt = TracerPreparedStatement.newInstance(CallableStatement.class, stmt, (String) params[0], preparedStatementListener, resultSetListener);
                 return stmt;
             } else if ("createStatement".equals(method.getName())) {
                 Statement stmt = (Statement) method.invoke(connection, params);
-                stmt = TracerStatement.newInstance(stmt, (String) params[0], preparedStatementListener, resultSetListener);
+                stmt = TracerStatement.newInstance(stmt, preparedStatementListener, resultSetListener);
                 return stmt;
             } else {
                 return method.invoke(connection, params);

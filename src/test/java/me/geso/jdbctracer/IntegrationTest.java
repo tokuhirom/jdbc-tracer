@@ -3,7 +3,10 @@ package me.geso.jdbctracer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class IntegrationTest {
     private static Connection fixtureConn;
@@ -24,6 +26,7 @@ public class IntegrationTest {
 
         fixtureConn = DriverManager.getConnection("jdbc:h2:mem:test");
         call(fixtureConn, "CREATE TABLE IF NOT EXISTS user (id int, name varchar(255))");
+        call(fixtureConn, "DELETE FROM user");
         call(fixtureConn, "INSERT INTO user (id, name) values (1,'john')");
         call(fixtureConn, "INSERT INTO user (id, name) values (2,'nick')");
     }
@@ -65,7 +68,40 @@ public class IntegrationTest {
             assertThat(results.get(0).getQuery())
                     .isEqualTo("SELECT name FROM user WHERE id=?");
             assertThat(results.get(0).getArgs())
-                    .isEqualTo(Arrays.asList(2));
+                    .isEqualTo(Collections.singletonList(2));
+
+            // fetched data
+            assertThat(names)
+                    .hasSize(1);
+            assertThat(names.get(0))
+                    .isEqualTo("nick");
+        }
+    }
+
+    @Test
+    public void statement() throws SQLException {
+        try (Connection connection = DriverManager.
+                getConnection("jdbc:tracer:ps=me.geso.jdbctracer.IntegrationTest$PSListener:h2:mem:test")) {
+            List<String> names = new ArrayList<>();
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet resultSet = statement.executeQuery("SELECT name FROM user WHERE id=2")) {
+                    while (resultSet.next()) {
+                        String name = resultSet.getString(1);
+                        names.add(name);
+                    }
+                }
+            }
+
+            // tracing data
+            List<PSListener.PSResult> results = PSListener.getResults();
+            assertThat(results)
+                    .hasSize(1);
+            assertThat(results.get(0).getElapsed())
+                    .isNotEqualTo(0);
+            assertThat(results.get(0).getQuery())
+                    .isEqualTo("SELECT name FROM user WHERE id=2");
+            assertThat(results.get(0).getArgs())
+                    .isEqualTo(Collections.emptyList());
 
             // fetched data
             assertThat(names)
@@ -112,22 +148,32 @@ public class IntegrationTest {
         }
     }
 
+    @Before
+    public void clear() {
+        PSListener.clear();
+        RSListener.clear();
+    }
+
     public static class PSListener implements PreparedStatementListener {
         private static List<PSResult> results = new ArrayList<>();
+
+        static List<PSResult> getResults() {
+            return Collections.unmodifiableList(results);
+        }
+
+        static void clear() {
+            results.clear();
+        }
 
         @Override
         public void trace(long elapsed, String query, List<Object> args) {
             results.add(new PSResult(elapsed, query, args));
         }
 
-        public static List<PSResult> getResults() {
-            return Collections.unmodifiableList(results);
-        }
-
         @AllArgsConstructor
         @Getter
         @ToString
-        public static class PSResult {
+        static class PSResult {
             private long elapsed;
             private String query;
             private List<Object> args;
@@ -136,6 +182,14 @@ public class IntegrationTest {
 
     public static class RSListener implements ResultSetListener {
         private static List<RSResult> results = new ArrayList<>();
+
+        static List<RSResult> getResults() {
+            return Collections.unmodifiableList(results);
+        }
+
+        private static void clear() {
+            results.clear();
+        }
 
         @Override
         public void trace(boolean first, ResultSet resultSet) throws SQLException {
@@ -146,10 +200,6 @@ public class IntegrationTest {
                 values.add(resultSet.getObject(i));
             }
             results.add(new RSResult(first, values));
-        }
-
-        public static List<RSResult> getResults() {
-            return Collections.unmodifiableList(results);
         }
 
         @AllArgsConstructor

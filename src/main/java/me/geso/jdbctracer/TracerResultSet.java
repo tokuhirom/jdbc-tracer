@@ -1,5 +1,7 @@
 package me.geso.jdbctracer;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import me.geso.jdbctracer.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationHandler;
@@ -7,6 +9,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.ResultSet;
 
+@EqualsAndHashCode
+@ToString
 class TracerResultSet implements InvocationHandler {
     private final ResultSet resultSet;
     private ResultSetListener resultSetListener;

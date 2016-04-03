@@ -58,7 +58,7 @@ public class TracerDriver implements java.sql.Driver {
             return (Connection) Proxy.newProxyInstance(
                     getClass().getClassLoader(),
                     new Class<?>[]{Connection.class},
-                    new TracerConnectionInter(connection, ps, rs));
+                    new TracerConnection(connection, ps, rs));
         } else {
             return null;
         }

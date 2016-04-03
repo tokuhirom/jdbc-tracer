@@ -3,19 +3,31 @@ package me.geso.jdbctracer;
 import me.geso.jdbctracer.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class TracerPreparedStatement extends AbstractStatement implements InvocationHandler {
+class TracerPreparedStatement implements InvocationHandler {
+    private static final Set<String> EXECUTE_METHODS = buildExecuteMethods();
+    private static final Set<String> SET_METHODS = buildSetMethods();
     private final PreparedStatement statement;
     private final ResultSetListener resultSetListener;
+    private final ColumnValues columnValues = new ColumnValues();
+    private final String query;
+    private final PreparedStatementListener preparedStatementListener;
 
-    protected static final Set<String> SET_METHODS = buildSetMethods();
+    private TracerPreparedStatement(PreparedStatement statement, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+        this.query = query;
+        this.preparedStatementListener = preparedStatementListener;
+        this.statement = statement;
+        this.resultSetListener = resultSetListener;
+    }
 
     private static Set<String> buildSetMethods() {
         Set<String> set = new HashSet<>();
@@ -46,17 +58,20 @@ public class TracerPreparedStatement extends AbstractStatement implements Invoca
         return Collections.unmodifiableSet(set);
     }
 
-    public TracerPreparedStatement(PreparedStatement statement, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
-        super(query, preparedStatementListener);
-        this.statement = statement;
-        this.resultSetListener = resultSetListener;
-    }
-
-    public static PreparedStatement newInstance(PreparedStatement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+    static PreparedStatement newInstance(Class<?> klass, PreparedStatement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         return (PreparedStatement) Proxy.newProxyInstance(
                 TracerPreparedStatement.class.getClassLoader(),
-                new Class<?>[]{PreparedStatement.class},
+                new Class<?>[]{klass},
                 new TracerPreparedStatement(stmt, query, preparedStatementListener, resultSetListener));
+    }
+
+    private static Set<String> buildExecuteMethods() {
+        Set<String> exec = new HashSet<>();
+        exec.add("execute");
+        exec.add("executeUpdate");
+        exec.add("executeQuery");
+        exec.add("addBatch");
+        return Collections.unmodifiableSet(exec);
     }
 
     @Override
@@ -87,12 +102,35 @@ public class TracerPreparedStatement extends AbstractStatement implements Invoca
                 ResultSet rs = (ResultSet) method.invoke(statement, params);
                 return rs == null ? null : TracerResultSet.newInstance(rs, resultSetListener);
             } else if ("getUpdateCount".equals(method.getName())) {
-                return (Integer) method.invoke(statement, params);
+                return method.invoke(statement, params);
             } else {
                 return method.invoke(statement, params);
             }
         } catch (Throwable t) {
             throw ExceptionUtil.unwrapThrowable(t);
         }
+    }
+
+    private void setColumn(int pos, Object value) {
+        this.columnValues.put(pos, value);
+    }
+
+    private <T> T trace(TraceSupplier<T> supplier) throws InvocationTargetException, IllegalAccessException {
+        List<Object> params = this.columnValues.values();
+        this.columnValues.clear();
+        if (preparedStatementListener != null) {
+            long start = System.nanoTime();
+            T retval = supplier.get();
+            long finished = System.nanoTime();
+            preparedStatementListener.trace(finished - start, query, params);
+            return retval;
+        } else {
+            return supplier.get();
+        }
+    }
+
+    private interface TraceSupplier<T> {
+        T get() throws IllegalAccessException, IllegalArgumentException,
+                InvocationTargetException;
     }
 }
