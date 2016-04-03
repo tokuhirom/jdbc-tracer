@@ -43,71 +43,73 @@ public class IntegrationTest {
 
     @Test
     public void psUrl() throws SQLException {
-        Connection connection = DriverManager.
-                getConnection("jdbc:tracer:ps=me.geso.jdbctracer.IntegrationTest$PSListener:h2:mem:test");
-        List<String> names = new ArrayList<>();
-        try (PreparedStatement ps = connection.prepareStatement("SELECT name FROM user WHERE id=?")) {
-            ps.setInt(1, 2);
-            try (ResultSet resultSet = ps.executeQuery()) {
-                while (resultSet.next()) {
-                    String name = resultSet.getString(1);
-                    names.add(name);
+        try (Connection connection = DriverManager.
+                getConnection("jdbc:tracer:ps=me.geso.jdbctracer.IntegrationTest$PSListener:h2:mem:test")) {
+            List<String> names = new ArrayList<>();
+            try (PreparedStatement ps = connection.prepareStatement("SELECT name FROM user WHERE id=?")) {
+                ps.setInt(1, 2);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    while (resultSet.next()) {
+                        String name = resultSet.getString(1);
+                        names.add(name);
+                    }
                 }
             }
+
+            // tracing data
+            List<PSListener.PSResult> results = PSListener.getResults();
+            assertThat(results)
+                    .hasSize(1);
+            assertThat(results.get(0).getElapsed())
+                    .isNotEqualTo(0);
+            assertThat(results.get(0).getQuery())
+                    .isEqualTo("SELECT name FROM user WHERE id=?");
+            assertThat(results.get(0).getArgs())
+                    .isEqualTo(Arrays.asList(2));
+
+            // fetched data
+            assertThat(names)
+                    .hasSize(1);
+            assertThat(names.get(0))
+                    .isEqualTo("nick");
         }
-
-        // tracing data
-        List<PSListener.PSResult> results = PSListener.getResults();
-        assertThat(results)
-                .hasSize(1);
-        assertThat(results.get(0).getElapsed())
-                .isNotEqualTo(0);
-        assertThat(results.get(0).getQuery())
-                .isEqualTo("SELECT name FROM user WHERE id=?");
-        assertThat(results.get(0).getArgs())
-                .isEqualTo(Arrays.asList(2));
-
-        // fetched data
-        assertThat(names)
-                .hasSize(1);
-        assertThat(names.get(0))
-                .isEqualTo("nick");
     }
 
     @Test
     public void rsUrl() throws SQLException {
-        Connection connection = DriverManager.
-                getConnection("jdbc:tracer:rs=me.geso.jdbctracer.IntegrationTest$RSListener:h2:mem:test");
-        List<String> names = new ArrayList<>();
-        try (PreparedStatement ps = connection.prepareStatement("SELECT id, name FROM user ORDER BY id")) {
-            try (ResultSet resultSet = ps.executeQuery()) {
-                while (resultSet.next()) {
-                    String name = resultSet.getString(2);
-                    names.add(name);
+        try (Connection connection = DriverManager.
+                getConnection("jdbc:tracer:rs=me.geso.jdbctracer.IntegrationTest$RSListener:h2:mem:test")) {
+            List<String> names = new ArrayList<>();
+            try (PreparedStatement ps = connection.prepareStatement("SELECT id, name FROM user ORDER BY id")) {
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    while (resultSet.next()) {
+                        String name = resultSet.getString(2);
+                        names.add(name);
+                    }
                 }
             }
+
+            // tracing data
+            List<RSListener.RSResult> results = RSListener.getResults();
+            assertThat(results)
+                    .hasSize(2);
+            assertThat(results.get(0).isFirst())
+                    .isTrue();
+            assertThat(results.get(0).getValues())
+                    .isEqualTo(Arrays.asList(1, "john"));
+            assertThat(results.get(1).isFirst())
+                    .isFalse();
+            assertThat(results.get(1).getValues())
+                    .isEqualTo(Arrays.asList(2, "nick"));
+
+            // fetched data
+            assertThat(names)
+                    .hasSize(2);
+            assertThat(names.get(0))
+                    .isEqualTo("john");
+            assertThat(names.get(1))
+                    .isEqualTo("nick");
         }
-
-        // tracing data
-        List<RSListener.RSResult> results = RSListener.getResults();
-        assertThat(results)
-                .hasSize(2);
-        assertThat(results.get(0).isFirst())
-                .isTrue();
-        assertThat(results.get(0).getValues())
-                .isEqualTo(Arrays.asList(1, "john"));
-        assertThat(results.get(1).isFirst())
-                .isFalse();
-        assertThat(results.get(1).getValues())
-                .isEqualTo(Arrays.asList(2, "nick"));
-
-        // fetched data
-        assertThat(names)
-                .hasSize(2);
-        assertThat(names.get(0))
-                .isEqualTo("john");
-        assertThat(names.get(1))
-                .isEqualTo("nick");
     }
 
     public static class PSListener implements PreparedStatementListener {
