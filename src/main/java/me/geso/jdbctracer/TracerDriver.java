@@ -1,7 +1,5 @@
 package me.geso.jdbctracer;
 
-import com.mysql.jdbc.interceptors.ResultSetScannerInterceptor;
-
 import java.lang.reflect.Proxy;
 import java.sql.*;
 import java.util.Enumeration;
@@ -18,7 +16,7 @@ public class TracerDriver implements java.sql.Driver {
         try {
             java.sql.DriverManager.registerDriver(new TracerDriver());
         } catch (SQLException e) {
-            throw new RuntimeException("Can't register jdbcproxy driver!");
+            throw new RuntimeException("Can't register jdbc-tracer driver!");
         }
     }
 
@@ -128,6 +126,8 @@ public class TracerDriver implements java.sql.Driver {
                     case "ps":
                         urlParseResult.preparedStatementListener = klassName;
                         break;
+                    default:
+                        throw new InvalidJDBCTracerURL(url);
                 }
             }
             return urlParseResult;
