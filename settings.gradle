@@ -1,2 +1,5 @@
 rootProject.name = 'jdbc-tracer'
 
+include ':jdbc-tracer'
+
+project(':jdbc-tracer').projectDir = "$rootDir/jdbc-tracer" as File
