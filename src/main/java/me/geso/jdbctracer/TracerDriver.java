@@ -1,6 +1,5 @@
 package me.geso.jdbctracer;
 
-import java.io.Serializable;
 import java.lang.reflect.Proxy;
 import java.sql.*;
 import java.util.Enumeration;
