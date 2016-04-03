@@ -3,6 +3,7 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'findbugs'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -22,6 +23,13 @@ dependencies {
     // TODO remove
     compile 'org.slf4j:slf4j-simple:1.7.20'
     compile 'org.slf4j:slf4j-api:1.7.20'
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
 }
 
 task wrapper(type: Wrapper) {
