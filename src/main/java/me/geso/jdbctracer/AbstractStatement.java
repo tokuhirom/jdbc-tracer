@@ -10,7 +10,7 @@ public abstract class AbstractStatement {
     private final ColumnValues columnValues = new ColumnValues();
 
     private static Set<String> buildExecuteMethods() {
-        Set exec = new HashSet<>();
+        Set<String> exec = new HashSet<>();
         exec.add("execute");
         exec.add("executeUpdate");
         exec.add("executeQuery");

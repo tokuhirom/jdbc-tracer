@@ -1,5 +1,6 @@
 package me.geso.jdbctracer;
 
+import java.io.Serializable;
 import java.lang.reflect.Proxy;
 import java.sql.*;
 import java.util.Enumeration;
@@ -44,11 +45,11 @@ public class TracerDriver implements java.sql.Driver {
             try {
                 if (urlParseResult.preparedStatementListener != null) {
                     Class<?> aClass = Class.forName(urlParseResult.preparedStatementListener);
-                    ps = (PreparedStatementListener)aClass.newInstance();
+                    ps = (PreparedStatementListener) aClass.newInstance();
                 }
                 if (urlParseResult.resultSetListener != null) {
                     Class<?> aClass = Class.forName(urlParseResult.resultSetListener);
-                    rs = (ResultSetListener)aClass.newInstance();
+                    rs = (ResultSetListener) aClass.newInstance();
                 }
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new SQLException(e);
@@ -57,7 +58,7 @@ public class TracerDriver implements java.sql.Driver {
             Connection connection = Objects.requireNonNull(underlyingDriver.connect(urlParseResult.underlingUri, info));
             return (Connection) Proxy.newProxyInstance(
                     getClass().getClassLoader(),
-                    new Class[]{Connection.class},
+                    new Class<?>[]{Connection.class},
                     new TracerConnectionInter(connection, ps, rs));
         } else {
             return null;
@@ -137,6 +138,8 @@ public class TracerDriver implements java.sql.Driver {
     }
 
     private static class InvalidJDBCTracerURL extends SQLException {
+        private static final long serialVersionUID = 2135244094396331484L;
+
         InvalidJDBCTracerURL(String url) {
             super("Invalid JDBC tracer URL: " + url);
         }
@@ -149,11 +152,11 @@ public class TracerDriver implements java.sql.Driver {
     }
 
     private Driver getUnderlyingDriver(String underlingUri) throws SQLException {
-        Enumeration e = DriverManager.getDrivers();
+        Enumeration<Driver> e = DriverManager.getDrivers();
 
         Driver d;
         while (e.hasMoreElements()) {
-            d = (Driver) e.nextElement();
+            d = e.nextElement();
 
             if (d.acceptsURL(underlingUri)) {
                 return d;

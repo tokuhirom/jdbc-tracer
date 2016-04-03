@@ -38,6 +38,10 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
+compileJava {
+    options.compilerArgs << '-XDignore.symbol.file' << '-Xlint:all'
+}
+
 artifacts {
     archives javadocJar, sourcesJar
 }

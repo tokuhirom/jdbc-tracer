@@ -8,6 +8,7 @@ import org.junit.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,13 +57,14 @@ public class IntegrationTest {
         }
 
         // tracing data
-        assertThat(PSListener.results)
+        List<PSListener.PSResult> results = PSListener.getResults();
+        assertThat(results)
                 .hasSize(1);
-        assertThat(PSListener.results.get(0).getElapsed())
+        assertThat(results.get(0).getElapsed())
                 .isNotEqualTo(0);
-        assertThat(PSListener.results.get(0).getQuery())
+        assertThat(results.get(0).getQuery())
                 .isEqualTo("SELECT name FROM user WHERE id=?");
-        assertThat(PSListener.results.get(0).getArgs())
+        assertThat(results.get(0).getArgs())
                 .isEqualTo(Arrays.asList(2));
 
         // fetched data
@@ -87,15 +89,16 @@ public class IntegrationTest {
         }
 
         // tracing data
-        assertThat(RSListener.results)
+        List<RSListener.RSResult> results = RSListener.getResults();
+        assertThat(results)
                 .hasSize(2);
-        assertThat(RSListener.results.get(0).isFirst())
+        assertThat(results.get(0).isFirst())
                 .isTrue();
-        assertThat(RSListener.results.get(0).getValues())
+        assertThat(results.get(0).getValues())
                 .isEqualTo(Arrays.asList(1, "john"));
-        assertThat(RSListener.results.get(1).isFirst())
+        assertThat(results.get(1).isFirst())
                 .isFalse();
-        assertThat(RSListener.results.get(1).getValues())
+        assertThat(results.get(1).getValues())
                 .isEqualTo(Arrays.asList(2, "nick"));
 
         // fetched data
@@ -108,11 +111,15 @@ public class IntegrationTest {
     }
 
     public static class PSListener implements PreparedStatementListener {
-        public static List<PSResult> results = new ArrayList<>();
+        private static List<PSResult> results = new ArrayList<>();
 
         @Override
         public void trace(long elapsed, String query, List<Object> args) {
             results.add(new PSResult(elapsed, query, args));
+        }
+
+        public static List<PSResult> getResults() {
+            return Collections.unmodifiableList(results);
         }
 
         @AllArgsConstructor
@@ -126,7 +133,7 @@ public class IntegrationTest {
     }
 
     public static class RSListener implements ResultSetListener {
-        public static List<PSResult> results = new ArrayList<>();
+        private static List<RSResult> results = new ArrayList<>();
 
         @Override
         public void trace(boolean first, ResultSet resultSet) throws SQLException {
@@ -136,13 +143,17 @@ public class IntegrationTest {
             for (int i = 1; i <= columnCount; ++i) {
                 values.add(resultSet.getObject(i));
             }
-            results.add(new PSResult(first, values));
+            results.add(new RSResult(first, values));
+        }
+
+        public static List<RSResult> getResults() {
+            return Collections.unmodifiableList(results);
         }
 
         @AllArgsConstructor
         @Getter
         @ToString
-        public static class PSResult {
+        public static class RSResult {
             private boolean first;
             private List<Object> values;
         }

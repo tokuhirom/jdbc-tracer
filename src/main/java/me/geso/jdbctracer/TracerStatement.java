@@ -23,7 +23,7 @@ public class TracerStatement extends AbstractStatement implements InvocationHand
     public static Statement newInstance(Statement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         return (Statement) Proxy.newProxyInstance(
                 TracerPreparedStatement.class.getClassLoader(),
-                new Class[]{Statement.class},
+                new Class<?>[]{Statement.class},
                 new TracerStatement(stmt, query, preparedStatementListener, resultSetListener));
     }
 

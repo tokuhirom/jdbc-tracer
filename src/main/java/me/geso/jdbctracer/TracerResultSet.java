@@ -21,7 +21,7 @@ class TracerResultSet implements InvocationHandler {
     static ResultSet newInstance(ResultSet resultSet, ResultSetListener resultSetListener) {
         return (ResultSet) Proxy.newProxyInstance(
                 TracerPreparedStatement.class.getClassLoader(),
-                new Class[]{ResultSet.class},
+                new Class<?>[]{ResultSet.class},
                 new TracerResultSet(resultSet, resultSetListener));
     }
 

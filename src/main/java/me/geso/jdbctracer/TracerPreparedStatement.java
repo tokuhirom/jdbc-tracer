@@ -23,7 +23,7 @@ public class TracerPreparedStatement extends AbstractStatement implements Invoca
     public static PreparedStatement newInstance(PreparedStatement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         return (PreparedStatement) Proxy.newProxyInstance(
                 TracerPreparedStatement.class.getClassLoader(),
-                new Class[]{PreparedStatement.class},
+                new Class<?>[]{PreparedStatement.class},
                 new TracerPreparedStatement(stmt, query, preparedStatementListener, resultSetListener));
     }
 
