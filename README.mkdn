@@ -1,10 +1,54 @@
 # jdbc-tracer
 
-## Usage
+jdbc-tracer is a JDBC driver, which provides hook points to trace all queries.
+
+## Use cases
+
+ * Record all statements executed by JDBC driver
+ * Detect heavy queries in development environment.
+   * Send EXPLAIN statement
+ * Logging queries and parameters.
+ * Detect webapp controller, that sends too much SQL queries.
+
+## Listeners
+
+You need to implement PreparedStatementListener or ResultSetListener.
+
+### PreparedStatementListener
+
+You can get following values for each executed queries:
+
+ * elapsed time
+ * SQL statement
+ * binded variables
+
+### ResultSetListener
+
+You can get following values for each got rows:
+
+ * isFirstRow
+   * You may print column information on first row.
+ * resultSet
+   * you can get resultset information!
+     * (MUST NOT call `next()` from the listener. it cause infinite loop)
+
+## Configuration
+
+First, you need to load this JDBC driver:
+
+    Class.forName("me.geso.jdbctracer.TracerDriver").newInstance();
+
+JDBC url with result set listener:
+
+    jdbc:tracer:rs=me.geso.jdbctracer.IntegrationTest$RSListener:h2:mem:test
+
+JDBC url with prepared statement listener:
+
+    jdbc:tracer:ps=me.geso.jdbctracer.IntegrationTest$PSListener:h2:mem:test
 
 ## Install
 
-## Motivation
+You can install this library from maven central.
 
 ## License
 
