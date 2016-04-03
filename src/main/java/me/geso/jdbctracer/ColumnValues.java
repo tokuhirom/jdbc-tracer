@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ToString
-public class ColumnValues {
+class ColumnValues {
     private Map<Integer, Object> columnValues = new HashMap<>();
 
     void put(Integer key, Object value) {
