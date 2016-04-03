@@ -18,7 +18,7 @@ dependencies {
     compile 'mysql:mysql-connector-java:5.1.38'
     compile 'org.projectlombok:lombok:1.16.8'
     compile 'com.h2database:h2:1.4.191'
-    compile 'org.assertj:assertj-core:3.4.0'
+    testCompile 'org.assertj:assertj-core:3.4.0'
 }
 
 tasks.withType(FindBugs) {
