@@ -1,6 +1,5 @@
 package me.geso.jdbctracer;
 
-import java.lang.reflect.Proxy;
 import java.sql.*;
 import java.util.Enumeration;
 import java.util.Objects;
@@ -39,26 +38,23 @@ public class TracerDriver implements java.sql.Driver {
             if (underlyingDriver == null) {
                 return null;
             }
-            PreparedStatementListener ps = preparedStatementListener;
-            ResultSetListener rs = resultSetListener;
+            PreparedStatementListener psl = preparedStatementListener;
+            ResultSetListener rsl = resultSetListener;
             try {
                 if (urlParseResult.preparedStatementListener != null) {
                     Class<?> aClass = Class.forName(urlParseResult.preparedStatementListener);
-                    ps = (PreparedStatementListener) aClass.newInstance();
+                    psl = (PreparedStatementListener) aClass.newInstance();
                 }
                 if (urlParseResult.resultSetListener != null) {
                     Class<?> aClass = Class.forName(urlParseResult.resultSetListener);
-                    rs = (ResultSetListener) aClass.newInstance();
+                    rsl = (ResultSetListener) aClass.newInstance();
                 }
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new SQLException(e);
             }
 
             Connection connection = Objects.requireNonNull(underlyingDriver.connect(urlParseResult.underlingUri, info));
-            return (Connection) Proxy.newProxyInstance(
-                    getClass().getClassLoader(),
-                    new Class<?>[]{Connection.class},
-                    new TracerConnection(connection, ps, rs));
+            return TracerConnection.newInstance(connection, psl, rsl);
         } else {
             return null;
         }

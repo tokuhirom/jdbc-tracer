@@ -39,29 +39,32 @@ public class TracerConnectionTest {
 
     @Test
     public void prepareStatement() throws Exception {
-        PreparedStatement preparedStatement = target.prepareStatement("SELECT * FROM a");
-        assertThat(preparedStatement.toString())
-                .contains("TracerPreparedStatement");
-        verify(connection, times(1))
-                .prepareStatement("SELECT * FROM a");
+        try (PreparedStatement preparedStatement = target.prepareStatement("SELECT * FROM a")) {
+            assertThat(preparedStatement.toString())
+                    .contains("TracerPreparedStatement");
+            verify(connection, times(1))
+                    .prepareStatement("SELECT * FROM a");
+        }
     }
 
     @Test
     public void prepareCall() throws Exception {
-        CallableStatement statement = target.prepareCall("foo");
-        assertThat(statement.toString())
-                .contains("TracerPreparedStatement");
-        verify(connection, times(1))
-                .prepareCall("foo");
+        try (CallableStatement statement = target.prepareCall("foo");) {
+            assertThat(statement.toString())
+                    .contains("TracerPreparedStatement");
+            verify(connection, times(1))
+                    .prepareCall("foo");
+        }
     }
 
     @Test
     public void createStatement() throws Exception {
-        Statement statement = target.createStatement();
-        assertThat(statement.toString())
-                .contains("TracerStatement");
-        verify(connection, times(1))
-                .createStatement();
+        try (Statement statement = target.createStatement()) {
+            assertThat(statement.toString())
+                    .contains("TracerStatement");
+            verify(connection, times(1))
+                    .createStatement();
+        }
     }
 
 }

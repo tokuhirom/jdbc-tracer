@@ -4,6 +4,7 @@ import me.geso.jdbctracer.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,6 +20,15 @@ class TracerConnection implements InvocationHandler {
         this.connection = Objects.requireNonNull(connection);
         this.preparedStatementListener = preparedStatementListener;
         this.resultSetListener = resultSetListener;
+    }
+
+    static Connection newInstance(Connection connection,
+                                  PreparedStatementListener psl,
+                                  ResultSetListener rsl) {
+        return (Connection) Proxy.newProxyInstance(
+                TracerConnection.class.getClassLoader(),
+                new Class<?>[]{Connection.class},
+                new TracerConnection(connection, psl, rsl));
     }
 
     @Override
