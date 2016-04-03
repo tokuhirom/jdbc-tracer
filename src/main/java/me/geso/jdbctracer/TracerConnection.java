@@ -11,7 +11,10 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Objects;
 
-class TracerConnection implements InvocationHandler {
+/**
+ * Traced connection
+ */
+public class TracerConnection implements InvocationHandler {
     private Connection connection;
     private final PreparedStatementListener preparedStatementListener;
     private final ResultSetListener resultSetListener;
@@ -22,7 +25,15 @@ class TracerConnection implements InvocationHandler {
         this.resultSetListener = resultSetListener;
     }
 
-    static Connection newInstance(Connection connection,
+    /**
+     * Create new instance of traced connection.
+     *
+     * @param connection Target JDBC connection
+     * @param psl        Listener for PreparedStatement/Statement
+     * @param rsl        Listener for ResultSet
+     * @return Created connection object.
+     */
+    public static Connection newInstance(Connection connection,
                                   PreparedStatementListener psl,
                                   ResultSetListener rsl) {
         return (Connection) Proxy.newProxyInstance(
