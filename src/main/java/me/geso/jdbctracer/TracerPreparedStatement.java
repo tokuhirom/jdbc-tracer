@@ -13,13 +13,11 @@ import java.util.List;
 public class TracerPreparedStatement extends AbstractStatement implements InvocationHandler {
     private final PreparedStatement statement;
     private final ResultSetListener resultSetListener;
-    private final ColumnValues columnValues;
 
     public TracerPreparedStatement(PreparedStatement statement, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         super(query, preparedStatementListener);
         this.statement = statement;
         this.resultSetListener = resultSetListener;
-        this.columnValues = new ColumnValues();
     }
 
     public static PreparedStatement newInstance(PreparedStatement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
@@ -36,8 +34,6 @@ public class TracerPreparedStatement extends AbstractStatement implements Invoca
                 return method.invoke(this, params);
             }
             if (EXECUTE_METHODS.contains(method.getName())) {
-                List<Object> columnValues = this.columnValues.values();
-                this.columnValues.clear();
                 if ("executeQuery".equals(method.getName())) {
                     return trace(() -> {
                         ResultSet rs = (ResultSet) method.invoke(statement, params);
@@ -50,9 +46,9 @@ public class TracerPreparedStatement extends AbstractStatement implements Invoca
                 }
             } else if (SET_METHODS.contains(method.getName())) {
                 if ("setNull".equals(method.getName())) {
-                    this.columnValues.put((int)params[0], null);
+                    setColumn((int)params[0], null);
                 } else {
-                    this.columnValues.put((int)params[0], params[1]);
+                    setColumn((int)params[0], params[1]);
                 }
                 return method.invoke(statement, params);
             } else if ("getResultSet".equals(method.getName())) {

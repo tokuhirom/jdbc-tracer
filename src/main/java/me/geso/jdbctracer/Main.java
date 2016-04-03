@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Created by tokuhirom on 4/2/16.
  */
+// TODO remove
 @Slf4j
 public class Main {
     public static void main(String[] args) throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {

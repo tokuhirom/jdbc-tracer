@@ -53,14 +53,18 @@ public abstract class AbstractStatement {
         this.preparedStatementListener = preparedStatementListener;
     }
 
+    protected void setColumn(int pos, Object value) {
+        this.columnValues.put(pos, value);
+    }
+
     protected <T> T trace(TraceSupplier<T> supplier) throws InvocationTargetException, IllegalAccessException {
-        List<Object> columnValues = this.columnValues.values();
+        List<Object> params = this.columnValues.values();
         this.columnValues.clear();
         if (preparedStatementListener != null) {
             long start = System.nanoTime();
             T retval = supplier.get();
             long finished = System.nanoTime();
-            preparedStatementListener.trace(finished - start, query, columnValues);
+            preparedStatementListener.trace(finished - start, query, params);
             return retval;
         } else {
             return supplier.get();
