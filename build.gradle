@@ -1,5 +1,8 @@
+// releng: ./gradlew clean && ./gradlew uploadArchives -Prelease
+// build: ./gradlew build
+
 group 'me.geso'
-version '1.0-SNAPSHOT'
+version '0.0.1'
 
 apply plugin: 'java'
 apply plugin: 'idea'

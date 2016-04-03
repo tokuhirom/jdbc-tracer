@@ -8,11 +8,45 @@ import java.lang.reflect.Proxy;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TracerPreparedStatement extends AbstractStatement implements InvocationHandler {
     private final PreparedStatement statement;
     private final ResultSetListener resultSetListener;
+
+    protected static final Set<String> SET_METHODS = buildSetMethods();
+
+    private static Set<String> buildSetMethods() {
+        Set<String> set = new HashSet<>();
+        set.add("setString");
+        set.add("setNString");
+        set.add("setInt");
+        set.add("setByte");
+        set.add("setShort");
+        set.add("setLong");
+        set.add("setDouble");
+        set.add("setFloat");
+        set.add("setTimestamp");
+        set.add("setDate");
+        set.add("setTime");
+        set.add("setArray");
+        set.add("setBigDecimal");
+        set.add("setAsciiStream");
+        set.add("setBinaryStream");
+        set.add("setBlob");
+        set.add("setBoolean");
+        set.add("setBytes");
+        set.add("setCharacterStream");
+        set.add("setNCharacterStream");
+        set.add("setClob");
+        set.add("setNClob");
+        set.add("setObject");
+        set.add("setNull");
+        return Collections.unmodifiableSet(set);
+    }
 
     public TracerPreparedStatement(PreparedStatement statement, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         super(query, preparedStatementListener);
