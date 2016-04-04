@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 public class PSTracer implements PreparedStatementListener {
-    Pattern re = Pattern.compile("(\\?)");
+    private static final Pattern RE = Pattern.compile("(\\?)");
 
     @Override
     public void trace(Connection connection, long elapsed, String query, List<Object> args) throws SQLException {
@@ -39,7 +39,7 @@ public class PSTracer implements PreparedStatementListener {
 
     private String bind(String query, List<Object> binds) {
         int idx = 0;
-        Matcher matcher = re.matcher(query);
+        Matcher matcher = RE.matcher(query);
         boolean result = matcher.find();
         if (result) {
             StringBuffer sb = new StringBuffer();
