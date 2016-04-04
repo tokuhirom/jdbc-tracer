@@ -13,8 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TracerConnectionTest {
@@ -39,6 +38,7 @@ public class TracerConnectionTest {
 
     @Test
     public void prepareStatement() throws Exception {
+        when(connection.prepareStatement("SELECT * FROM a")).thenReturn(mock(PreparedStatement.class));
         try (PreparedStatement preparedStatement = target.prepareStatement("SELECT * FROM a")) {
             assertThat(preparedStatement.toString())
                     .contains("TracerPreparedStatement");
@@ -49,6 +49,7 @@ public class TracerConnectionTest {
 
     @Test
     public void prepareCall() throws Exception {
+        when(connection.prepareCall("foo")).thenReturn(mock(CallableStatement.class));
         try (CallableStatement statement = target.prepareCall("foo");) {
             assertThat(statement.toString())
                     .contains("TracerPreparedStatement");
@@ -59,6 +60,7 @@ public class TracerConnectionTest {
 
     @Test
     public void createStatement() throws Exception {
+        when(connection.createStatement()).thenReturn(mock(Statement.class));
         try (Statement statement = target.createStatement()) {
             assertThat(statement.toString())
                     .contains("TracerStatement");
