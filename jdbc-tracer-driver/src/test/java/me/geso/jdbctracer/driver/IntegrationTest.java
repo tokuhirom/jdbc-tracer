@@ -23,9 +23,6 @@ public class IntegrationTest {
 
     @BeforeClass
     public static void beforeClass() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
-        Class.forName("org.h2.Driver");
-        Class.forName("me.geso.jdbctracer.driver.TracerDriver").newInstance();
-
         fixtureConn = DriverManager.getConnection("jdbc:h2:mem:test");
         call(fixtureConn, "CREATE TABLE IF NOT EXISTS user (id int, name varchar(255))");
         call(fixtureConn, "DELETE FROM user");
