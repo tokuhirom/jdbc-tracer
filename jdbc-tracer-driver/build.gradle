@@ -1,0 +1,86 @@
+apply plugin: 'findbugs'
+apply plugin: "maven"
+apply plugin: "signing"
+
+//set build variables based on build type (release, continuous integration, development)
+def isDevBuild
+def isReleaseBuild
+def sonatypeRepositoryUrl
+if (hasProperty("release")) {
+    isReleaseBuild = true
+    sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+} else if (hasProperty("ci")) {
+    version += "-SNAPSHOT"
+    sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+} else {
+    isDevBuild = true
+    version += "-SNAPSHOT"
+}
+
+signing {
+    required { isReleaseBuild }
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        if (isDevBuild) {
+            mavenLocal()
+        }
+        else {
+            mavenDeployer {
+                if(isReleaseBuild) {
+                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                }
+
+                repository(url: sonatypeRepositoryUrl) {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+
+                pom.project {
+                    name 'jdbc-tracer-driver'
+                    packaging 'jar'
+                    description 'JDBC tracer Driver'
+                    url 'https://github.com/tokuhirom/jdbc_tracer'
+
+                    scm {
+                        url "scm:git@github.com:tokuhirom/jdbc_tracer.git"
+                        connection "scm:git@github.com:tokuhirom/jdbc_tracer.git"
+                        developerConnection "scm:git@github.com:tokuhirom/jdbc_tracer.git"
+                    }
+                    licenses {
+                        license {
+                            name 'MIT'
+                            url 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id 'tokuhirom'
+                            name 'Tokuhiro Matsuno'
+                            email 'tokuhirom@gmail.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile project(':jdbc-tracer-core')
+    compile 'org.projectlombok:lombok:1.16.8'
+
+    testCompile 'org.mockito:mockito-core:2.0.44-beta'
+    testCompile 'com.h2database:h2:1.4.191'
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.assertj:assertj-core:3.4.0'
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+

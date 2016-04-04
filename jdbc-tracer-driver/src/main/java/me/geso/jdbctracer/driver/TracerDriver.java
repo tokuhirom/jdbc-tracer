@@ -1,4 +1,8 @@
-package me.geso.jdbctracer;
+package me.geso.jdbctracer.driver;
+
+import me.geso.jdbctracer.PreparedStatementListener;
+import me.geso.jdbctracer.ResultSetListener;
+import me.geso.jdbctracer.TracerConnection;
 
 import java.sql.*;
 import java.util.Enumeration;
@@ -8,12 +12,12 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TracerDriver implements java.sql.Driver {
+public class TracerDriver implements Driver {
     private static final Pattern URI_PATTERN = Pattern.compile("jdbc:tracer:([^:]*):(.*)");
 
     static {
         try {
-            java.sql.DriverManager.registerDriver(new TracerDriver());
+            DriverManager.registerDriver(new TracerDriver());
         } catch (SQLException e) {
             throw new RuntimeException("Can't register jdbc-tracer driver!");
         }

@@ -4,14 +4,12 @@ apply plugin: "signing"
 
 //set build variables based on build type (release, continuous integration, development)
 def isDevBuild
-def isCiBuild
 def isReleaseBuild
 def sonatypeRepositoryUrl
 if (hasProperty("release")) {
     isReleaseBuild = true
     sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 } else if (hasProperty("ci")) {
-    isCiBuild = true
     version += "-SNAPSHOT"
     sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
 } else {
@@ -40,7 +38,7 @@ uploadArchives {
                 }
 
                 pom.project {
-                    name 'jdbctracer'
+                    name 'me.geso.jdbctracer'
                     packaging 'jar'
                     description 'JDBC tracer'
                     url 'https://github.com/tokuhirom/jdbc_tracer'
@@ -74,7 +72,7 @@ dependencies {
 
     testCompile 'org.mockito:mockito-core:2.0.44-beta'
     testCompile 'com.h2database:h2:1.4.191'
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile 'junit:junit:4.11'
     testCompile 'org.assertj:assertj-core:3.4.0'
 }
 
