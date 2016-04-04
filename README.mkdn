@@ -1,7 +1,7 @@
 # jdbc-tracer
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/me.geso/jdbc-tracer/badge.svg)](https://maven-badges.herokuapp.com/maven-central/me.geso/jdbc-tracer)
-[![javadoc.io](https://javadocio-badges.herokuapp.com/me.geso/jdbc-tracer/badge.svg)](https://javadocio-badges.herokuapp.com/me.geso/jdbc-tracer)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/me.geso.jdbctracer/jdbc-tracer-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/me.geso.jdbctracer/jdbc-tracer-core)
+[![javadoc.io](https://javadocio-badges.herokuapp.com/me.geso.jdbctracer/jdbc-tracer-core/badge.svg)](https://javadocio-badges.herokuapp.com/me.geso.jdbctracer/jdbc-tracer-core)
 [![Build Status](https://travis-ci.org/tokuhirom/jdbc-tracer.svg?branch=master)](https://travis-ci.org/tokuhirom/jdbc-tracer)
 
 jdbc-tracer is a JDBC driver, which provides hook points to trace all queries.
@@ -38,10 +38,6 @@ You can get following values for each got rows:
      * (MUST NOT call `next()` from the listener. it cause infinite loop)
 
 ## Configuration
-
-First, you need to load this JDBC driver:
-
-    Class.forName("me.geso.me.geso.jdbctracer.TracerDriver").newInstance();
 
 JDBC url with result set listener:
 
