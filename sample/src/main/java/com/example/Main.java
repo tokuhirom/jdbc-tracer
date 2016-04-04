@@ -5,7 +5,7 @@ import java.sql.*;
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
         Class.forName("org.h2.Driver");
-        Class.forName("me.geso.jdbctracer.TracerDriver").newInstance();
+        Class.forName("me.geso.me.geso.jdbctracer.TracerDriver").newInstance();
 
         // create fixture data.
         try (Connection fixtureConn = DriverManager.getConnection("jdbc:h2:mem:test")) {

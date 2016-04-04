@@ -48,7 +48,7 @@ public class TracerStatementTest {
                 .contains("TracerResultSet");
 
         verify(psl, times(1))
-                .trace(connection, anyLong(), eq("foo"), eq(Collections.emptyList()));
+                .trace(eq(connection), anyLong(), eq("foo"), eq(Collections.emptyList()));
 
         verify(stmt, times(1))
                 .executeQuery("foo");
@@ -59,7 +59,7 @@ public class TracerStatementTest {
         this.target.execute("foo");
 
         verify(psl, times(1))
-                .trace(connection, anyLong(), eq("foo"), eq(Collections.emptyList()));
+                .trace(eq(connection), anyLong(), eq("foo"), eq(Collections.emptyList()));
         verify(stmt, times(1))
                 .execute("foo");
     }

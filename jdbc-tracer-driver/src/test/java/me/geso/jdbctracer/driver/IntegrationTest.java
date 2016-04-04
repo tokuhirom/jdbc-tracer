@@ -1,8 +1,10 @@
-package me.geso.jdbctracer;
+package me.geso.jdbctracer.driver;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import me.geso.jdbctracer.PreparedStatementListener;
+import me.geso.jdbctracer.ResultSetListener;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,7 +24,7 @@ public class IntegrationTest {
     @BeforeClass
     public static void beforeClass() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
         Class.forName("org.h2.Driver");
-        Class.forName("me.geso.jdbctracer.TracerDriver").newInstance();
+        Class.forName("me.geso.jdbctracer.driver.TracerDriver").newInstance();
 
         fixtureConn = DriverManager.getConnection("jdbc:h2:mem:test");
         call(fixtureConn, "CREATE TABLE IF NOT EXISTS user (id int, name varchar(255))");
@@ -47,7 +49,7 @@ public class IntegrationTest {
     @Test
     public void psUrl() throws SQLException {
         try (Connection connection = DriverManager.
-                getConnection("jdbc:tracer:ps=me.geso.jdbctracer.IntegrationTest$PSListener:h2:mem:test")) {
+                getConnection("jdbc:tracer:ps=me.geso.jdbctracer.driver.IntegrationTest$PSListener:h2:mem:test")) {
             List<String> names = new ArrayList<>();
             try (PreparedStatement ps = connection.prepareStatement("SELECT name FROM user WHERE id=?")) {
                 ps.setInt(1, 2);
@@ -81,7 +83,7 @@ public class IntegrationTest {
     @Test
     public void statement() throws SQLException {
         try (Connection connection = DriverManager.
-                getConnection("jdbc:tracer:ps=me.geso.jdbctracer.IntegrationTest$PSListener:h2:mem:test")) {
+                getConnection("jdbc:tracer:ps=me.geso.jdbctracer.driver.IntegrationTest$PSListener:h2:mem:test")) {
             List<String> names = new ArrayList<>();
             try (Statement statement = connection.createStatement()) {
                 try (ResultSet resultSet = statement.executeQuery("SELECT name FROM user WHERE id=2")) {
@@ -114,7 +116,7 @@ public class IntegrationTest {
     @Test
     public void rsUrl() throws SQLException {
         try (Connection connection = DriverManager.
-                getConnection("jdbc:tracer:rs=me.geso.jdbctracer.IntegrationTest$RSListener:h2:mem:test")) {
+                getConnection("jdbc:tracer:rs=me.geso.jdbctracer.driver.IntegrationTest$RSListener:h2:mem:test")) {
             List<String> names = new ArrayList<>();
             try (PreparedStatement ps = connection.prepareStatement("SELECT id, name FROM user ORDER BY id")) {
                 try (ResultSet resultSet = ps.executeQuery()) {

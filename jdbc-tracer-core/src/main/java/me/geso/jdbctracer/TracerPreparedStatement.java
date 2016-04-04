@@ -1,5 +1,6 @@
 package me.geso.jdbctracer;
 
+import lombok.NonNull;
 import me.geso.jdbctracer.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationHandler;
@@ -25,7 +26,7 @@ class TracerPreparedStatement implements InvocationHandler {
     private final String query;
     private final PreparedStatementListener preparedStatementListener;
 
-    private TracerPreparedStatement(Connection connection, PreparedStatement statement, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+    private TracerPreparedStatement(@NonNull Connection connection, @NonNull PreparedStatement statement, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         this.connection = connection;
         this.query = query;
         this.preparedStatementListener = preparedStatementListener;
@@ -62,7 +63,7 @@ class TracerPreparedStatement implements InvocationHandler {
         return Collections.unmodifiableSet(set);
     }
 
-    static PreparedStatement newInstance(Connection connection, Class<?> klass, PreparedStatement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+    static PreparedStatement newInstance(Connection connection, Class<?> klass, @NonNull PreparedStatement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         return (PreparedStatement) Proxy.newProxyInstance(
                 TracerPreparedStatement.class.getClassLoader(),
                 new Class<?>[]{klass},

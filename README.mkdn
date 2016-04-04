@@ -41,15 +41,15 @@ You can get following values for each got rows:
 
 First, you need to load this JDBC driver:
 
-    Class.forName("me.geso.jdbctracer.TracerDriver").newInstance();
+    Class.forName("me.geso.me.geso.jdbctracer.TracerDriver").newInstance();
 
 JDBC url with result set listener:
 
-    jdbc:tracer:rs=me.geso.jdbctracer.IntegrationTest$RSListener:h2:mem:test
+    jdbc:tracer:rs=me.geso.me.geso.jdbctracer.IntegrationTest$RSListener:h2:mem:test
 
 JDBC url with prepared statement listener:
 
-    jdbc:tracer:ps=me.geso.jdbctracer.IntegrationTest$PSListener:h2:mem:test
+    jdbc:tracer:ps=me.geso.me.geso.jdbctracer.IntegrationTest$PSListener:h2:mem:test
 
 ## Install
 

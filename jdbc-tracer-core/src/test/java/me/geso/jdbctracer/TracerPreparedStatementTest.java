@@ -52,7 +52,7 @@ public class TracerPreparedStatementTest {
                 .contains("TracerResultSet");
 
         verify(psl, times(1))
-                .trace(connection, anyLong(), eq("SELECT * FROM foo"), eq(Collections.singletonList(5963)));
+                .trace(eq(connection), anyLong(), eq("SELECT * FROM foo"), eq(Collections.singletonList(5963)));
 
         verify(stmt, times(1))
                 .executeQuery();
@@ -63,7 +63,7 @@ public class TracerPreparedStatementTest {
         this.target.execute();
 
         verify(psl, times(1))
-                .trace(connection, anyLong(), eq("SELECT * FROM foo"), eq(Collections.emptyList()));
+                .trace(eq(connection), anyLong(), eq("SELECT * FROM foo"), eq(Collections.emptyList()));
         verify(stmt, times(1))
                 .execute();
     }
