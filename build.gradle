@@ -1,13 +1,12 @@
 // releng: ./gradlew clean && ./gradlew uploadArchives -Prelease
 // build: ./gradlew build
 
-group 'me.geso'
-version '0.0.1'
-
-
 subprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
+
+    group 'me.geso.jdbctracer'
+    version '0.0.2'
 
     repositories {
         mavenCentral()
