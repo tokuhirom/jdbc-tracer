@@ -6,26 +6,30 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 
 class TracerStatement implements InvocationHandler {
     private final ResultSetListener resultSetListener;
     private final Statement statement;
+    private final Connection connection;
     private final PreparedStatementListener preparedStatementListener;
 
-    private TracerStatement(Statement stmt, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+    private TracerStatement(Connection connection, Statement stmt, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+        this.connection = connection;
         this.preparedStatementListener = preparedStatementListener;
         this.statement = stmt;
         this.resultSetListener = resultSetListener;
     }
 
-    static Statement newInstance(Statement stmt, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+    static Statement newInstance(Connection connection, Statement stmt, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         return (Statement) Proxy.newProxyInstance(
                 TracerPreparedStatement.class.getClassLoader(),
                 new Class<?>[]{Statement.class},
-                new TracerStatement(stmt, preparedStatementListener, resultSetListener));
+                new TracerStatement(connection, stmt, preparedStatementListener, resultSetListener));
     }
 
     @Override
@@ -62,12 +66,12 @@ class TracerStatement implements InvocationHandler {
         }
     }
 
-    private <T> T trace(String query, TraceSupplier<T> supplier) throws InvocationTargetException, IllegalAccessException {
+    private <T> T trace(String query, TraceSupplier<T> supplier) throws InvocationTargetException, IllegalAccessException, SQLException {
         if (preparedStatementListener != null) {
             long start = System.nanoTime();
             T retval = supplier.get();
             long finished = System.nanoTime();
-            preparedStatementListener.trace(finished - start, query, Collections.emptyList());
+            preparedStatementListener.trace(connection, finished - start, query, Collections.emptyList());
             return retval;
         } else {
             return supplier.get();

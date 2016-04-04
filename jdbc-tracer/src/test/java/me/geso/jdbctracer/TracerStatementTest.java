@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Collections;
@@ -16,6 +17,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TracerStatementTest {
+    @Mock
+    Connection connection;
     @Mock
     Statement stmt;
     @Mock
@@ -30,6 +33,7 @@ public class TracerStatementTest {
     @Before
     public void before() {
         this.target = TracerStatement.newInstance(
+                connection,
                 stmt,
                 psl,
                 rsl
@@ -44,7 +48,7 @@ public class TracerStatementTest {
                 .contains("TracerResultSet");
 
         verify(psl, times(1))
-                .trace(anyLong(), eq("foo"), eq(Collections.emptyList()));
+                .trace(connection, anyLong(), eq("foo"), eq(Collections.emptyList()));
 
         verify(stmt, times(1))
                 .executeQuery("foo");
@@ -55,7 +59,7 @@ public class TracerStatementTest {
         this.target.execute("foo");
 
         verify(psl, times(1))
-                .trace(anyLong(), eq("foo"), eq(Collections.emptyList()));
+                .trace(connection, anyLong(), eq("foo"), eq(Collections.emptyList()));
         verify(stmt, times(1))
                 .execute("foo");
     }

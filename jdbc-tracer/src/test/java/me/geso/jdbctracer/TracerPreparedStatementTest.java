@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.lang.reflect.Proxy;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Collections;
@@ -18,6 +19,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TracerPreparedStatementTest {
+    @Mock
+    Connection connection;
     @Mock
     PreparedStatement stmt;
     @Mock
@@ -32,7 +35,7 @@ public class TracerPreparedStatementTest {
     @Before
     public void before() {
         this.target = TracerPreparedStatement.newInstance(
-                PreparedStatement.class,
+                connection, PreparedStatement.class,
                 stmt,
                 "SELECT * FROM foo",
                 psl,
@@ -49,7 +52,7 @@ public class TracerPreparedStatementTest {
                 .contains("TracerResultSet");
 
         verify(psl, times(1))
-                .trace(anyLong(), eq("SELECT * FROM foo"), eq(Collections.singletonList(5963)));
+                .trace(connection, anyLong(), eq("SELECT * FROM foo"), eq(Collections.singletonList(5963)));
 
         verify(stmt, times(1))
                 .executeQuery();
@@ -60,7 +63,7 @@ public class TracerPreparedStatementTest {
         this.target.execute();
 
         verify(psl, times(1))
-                .trace(anyLong(), eq("SELECT * FROM foo"), eq(Collections.emptyList()));
+                .trace(connection, anyLong(), eq("SELECT * FROM foo"), eq(Collections.emptyList()));
         verify(stmt, times(1))
                 .execute();
     }

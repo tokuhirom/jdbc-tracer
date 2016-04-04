@@ -6,8 +6,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -19,10 +21,12 @@ class TracerPreparedStatement implements InvocationHandler {
     private final PreparedStatement statement;
     private final ResultSetListener resultSetListener;
     private final ColumnValues columnValues = new ColumnValues();
+    private final Connection connection;
     private final String query;
     private final PreparedStatementListener preparedStatementListener;
 
-    private TracerPreparedStatement(PreparedStatement statement, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+    private TracerPreparedStatement(Connection connection, PreparedStatement statement, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+        this.connection = connection;
         this.query = query;
         this.preparedStatementListener = preparedStatementListener;
         this.statement = statement;
@@ -58,11 +62,11 @@ class TracerPreparedStatement implements InvocationHandler {
         return Collections.unmodifiableSet(set);
     }
 
-    static PreparedStatement newInstance(Class<?> klass, PreparedStatement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
+    static PreparedStatement newInstance(Connection connection, Class<?> klass, PreparedStatement stmt, String query, PreparedStatementListener preparedStatementListener, ResultSetListener resultSetListener) {
         return (PreparedStatement) Proxy.newProxyInstance(
                 TracerPreparedStatement.class.getClassLoader(),
                 new Class<?>[]{klass},
-                new TracerPreparedStatement(stmt, query, preparedStatementListener, resultSetListener));
+                new TracerPreparedStatement(connection, stmt, query, preparedStatementListener, resultSetListener));
     }
 
     private static Set<String> buildExecuteMethods() {
@@ -115,14 +119,14 @@ class TracerPreparedStatement implements InvocationHandler {
         this.columnValues.put(pos, value);
     }
 
-    private <T> T trace(TraceSupplier<T> supplier) throws InvocationTargetException, IllegalAccessException {
+    private <T> T trace(TraceSupplier<T> supplier) throws InvocationTargetException, IllegalAccessException, SQLException {
         List<Object> params = this.columnValues.values();
         this.columnValues.clear();
         if (preparedStatementListener != null) {
             long start = System.nanoTime();
             T retval = supplier.get();
             long finished = System.nanoTime();
-            preparedStatementListener.trace(finished - start, query, params);
+            preparedStatementListener.trace(connection, finished - start, query, params);
             return retval;
         } else {
             return supplier.get();

@@ -50,14 +50,13 @@ public class TracerConnection implements InvocationHandler {
             }
             if ("prepareStatement".equals(method.getName())) {
                 PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
-                return TracerPreparedStatement.newInstance(PreparedStatement.class, stmt, (String) params[0], preparedStatementListener, resultSetListener);
+                return TracerPreparedStatement.newInstance(connection, PreparedStatement.class, stmt, (String) params[0], preparedStatementListener, resultSetListener);
             } else if ("prepareCall".equals(method.getName())) {
                 PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
-                stmt = TracerPreparedStatement.newInstance(CallableStatement.class, stmt, (String) params[0], preparedStatementListener, resultSetListener);
-                return stmt;
+                return TracerPreparedStatement.newInstance(connection, CallableStatement.class, stmt, (String) params[0], preparedStatementListener, resultSetListener);
             } else if ("createStatement".equals(method.getName())) {
                 Statement stmt = (Statement) method.invoke(connection, params);
-                stmt = TracerStatement.newInstance(stmt, preparedStatementListener, resultSetListener);
+                stmt = TracerStatement.newInstance(connection, stmt, preparedStatementListener, resultSetListener);
                 return stmt;
             } else {
                 return method.invoke(connection, params);

@@ -22,6 +22,7 @@ You need to implement PreparedStatementListener or ResultSetListener.
 
 You can get following values for each executed queries:
 
+ * connection
  * elapsed time
  * SQL statement
  * binded variables

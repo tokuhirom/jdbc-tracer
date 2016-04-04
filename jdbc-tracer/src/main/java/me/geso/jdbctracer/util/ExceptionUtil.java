@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 
 /**
- * Created by tokuhirom on 4/2/16.
  * See https://github.com/mybatis/mybatis-3/blob/master/src/main/java/org/apache/ibatis/reflection/ExceptionUtil.java
  */
 public class ExceptionUtil {

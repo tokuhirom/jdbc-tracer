@@ -4,119 +4,35 @@
 group 'me.geso'
 version '0.0.1'
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'findbugs'
-apply plugin: "maven"
-apply plugin: "signing"
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
 
-//set build variables based on build type (release, continuous integration, development)
-def isDevBuild
-def isCiBuild
-def isReleaseBuild
-def sonatypeRepositoryUrl
-if (hasProperty("release")) {
-    isReleaseBuild = true
-    sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-} else if (hasProperty("ci")) {
-    isCiBuild = true
-    version += "-SNAPSHOT"
-    sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-} else {
-    isDevBuild = true
-    version += "-SNAPSHOT"
-}
-
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from "${buildDir}/javadoc"
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-compileJava {
-    options.compilerArgs << '-XDignore.symbol.file' << '-Xlint:all'
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    required { isReleaseBuild }
-    sign configurations.archives
-}
-
-uploadArchives {
     repositories {
-        if (isDevBuild) {
-            mavenLocal()
-        }
-        else {
-            mavenDeployer {
-                if(isReleaseBuild) {
-                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-                }
-
-                repository(url: sonatypeRepositoryUrl) {
-                    authentication(userName: sonatypeUsername, password: sonatypePassword)
-                }
-
-                pom.project {
-                    name 'jdbctracer'
-                    packaging 'jar'
-                    description 'JDBC tracer'
-                    url 'https://github.com/tokuhirom/jdbc_tracer'
-
-                    scm {
-                        url "scm:git@github.com:tokuhirom/jdbc_tracer.git"
-                        connection "scm:git@github.com:tokuhirom/jdbc_tracer.git"
-                        developerConnection "scm:git@github.com:tokuhirom/jdbc_tracer.git"
-                    }
-                    licenses {
-                        license {
-                            name 'MIT'
-                            url 'https://opensource.org/licenses/MIT'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id 'tokuhirom'
-                            name 'Tokuhiro Matsuno'
-                            email 'tokuhirom@gmail.com'
-                        }
-                    }
-                }
-            }
-        }
+        mavenCentral()
+        jcenter()
     }
-}
 
-repositories {
-    mavenCentral()
-    jcenter()
-}
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-dependencies {
-    compile 'org.projectlombok:lombok:1.16.8'
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from "${buildDir}/javadoc"
+    }
 
-    testCompile 'org.mockito:mockito-core:2.0.44-beta'
-    testCompile 'com.h2database:h2:1.4.191'
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile 'org.assertj:assertj-core:3.4.0'
-}
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
 
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
+    compileJava {
+        options.compilerArgs << '-XDignore.symbol.file' << '-Xlint:all'
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
     }
 }
 

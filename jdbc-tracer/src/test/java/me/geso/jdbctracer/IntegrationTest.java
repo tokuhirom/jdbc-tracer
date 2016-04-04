@@ -166,7 +166,7 @@ public class IntegrationTest {
         }
 
         @Override
-        public void trace(long elapsed, String query, List<Object> args) {
+        public void trace(Connection connection, long elapsed, String query, List<Object> args) {
             results.add(new PSResult(elapsed, query, args));
         }
 
