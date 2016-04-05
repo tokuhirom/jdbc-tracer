@@ -6,8 +6,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static org.mockito.Mockito.*;
 
@@ -17,13 +19,17 @@ public class TracerResultSetTest {
     ResultSet resultSet;
     @Mock
     ResultSetListener rsl;
+    @Mock
+    Connection connection;
+    @Mock
+    Statement statement;
 
     private ResultSet target;
 
     @Before
     public void before() {
         this.target = TracerResultSet.newInstance(
-                resultSet,
+                connection, statement, resultSet,
                 rsl
         );
     }
@@ -32,8 +38,8 @@ public class TracerResultSetTest {
     public void test() throws SQLException {
         when(resultSet.next()).thenReturn(true);
         target.next();
-        verify(rsl, times(1)).trace(true, resultSet);
+        verify(rsl, times(1)).trace(connection, statement, true, resultSet);
         target.next();
-        verify(rsl, times(1)).trace(false, resultSet);
+        verify(rsl, times(1)).trace(connection, statement, false, resultSet);
     }
 }

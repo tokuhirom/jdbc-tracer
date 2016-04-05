@@ -89,7 +89,7 @@ class TracerPreparedStatement implements InvocationHandler {
                 if ("executeQuery".equals(method.getName()) && resultSetListener != null) {
                     return trace(() -> {
                         ResultSet rs = (ResultSet) method.invoke(statement, params);
-                        return rs == null ? null : TracerResultSet.newInstance(rs, resultSetListener);
+                        return rs == null ? null : TracerResultSet.newInstance(connection, statement, rs, resultSetListener);
                     });
                 } else {
                     return trace(() -> {
@@ -105,7 +105,7 @@ class TracerPreparedStatement implements InvocationHandler {
                 return method.invoke(statement, params);
             } else if ("getResultSet".equals(method.getName())) {
                 ResultSet rs = (ResultSet) method.invoke(statement, params);
-                return rs == null ? null : TracerResultSet.newInstance(rs, resultSetListener);
+                return rs == null ? null : TracerResultSet.newInstance(connection, statement, rs, resultSetListener);
             } else if ("getUpdateCount".equals(method.getName())) {
                 return method.invoke(statement, params);
             } else {

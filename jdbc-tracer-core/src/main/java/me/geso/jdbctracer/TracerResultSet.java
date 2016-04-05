@@ -7,26 +7,32 @@ import me.geso.jdbctracer.util.ExceptionUtil;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 @EqualsAndHashCode
 @ToString
 class TracerResultSet implements InvocationHandler {
+    private Connection connection;
+    private Statement statement;
     private final ResultSet resultSet;
     private ResultSetListener resultSetListener;
     private boolean first;
 
-    private TracerResultSet(ResultSet resultSet, ResultSetListener resultSetListener) {
+    private TracerResultSet(Connection connection, Statement statement, ResultSet resultSet, ResultSetListener resultSetListener) {
+        this.connection = connection;
+        this.statement = statement;
         this.resultSet = resultSet;
         this.resultSetListener = resultSetListener;
         this.first = true;
     }
 
-    static ResultSet newInstance(ResultSet resultSet, ResultSetListener resultSetListener) {
+    static ResultSet newInstance(Connection connection, Statement statement, ResultSet resultSet, ResultSetListener resultSetListener) {
         return (ResultSet) Proxy.newProxyInstance(
                 TracerPreparedStatement.class.getClassLoader(),
                 new Class<?>[]{ResultSet.class},
-                new TracerResultSet(resultSet, resultSetListener));
+                new TracerResultSet(connection, statement, resultSet, resultSetListener));
     }
 
     @Override
@@ -39,7 +45,7 @@ class TracerResultSet implements InvocationHandler {
             if ("next".equals(method.getName())) {
                 if (((Boolean) o)) {
                     if (resultSetListener != null) {
-                        resultSetListener.trace(first, resultSet);
+                        resultSetListener.trace(connection, statement, first, resultSet);
                         first = false;
                     }
                 }

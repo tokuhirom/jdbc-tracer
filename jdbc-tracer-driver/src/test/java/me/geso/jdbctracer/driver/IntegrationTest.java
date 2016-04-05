@@ -191,7 +191,7 @@ public class IntegrationTest {
         }
 
         @Override
-        public void trace(boolean first, ResultSet resultSet) throws SQLException {
+        public void trace(Connection connection, Statement statement, boolean first, ResultSet resultSet) throws SQLException {
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
             List<Object> values = new ArrayList<>();

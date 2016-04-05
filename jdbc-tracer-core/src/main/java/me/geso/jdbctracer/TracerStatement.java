@@ -42,7 +42,7 @@ class TracerStatement implements InvocationHandler {
                 String query = (String) params[0];
                 return trace(query, () -> {
                     ResultSet rs = (ResultSet) method.invoke(statement, params);
-                    return rs == null ? null : TracerResultSet.newInstance(rs, resultSetListener);
+                    return rs == null ? null : TracerResultSet.newInstance(connection, statement, rs, resultSetListener);
                 });
             } else if ("execute".equals(method.getName())
                     || "executeUpdate".equals(method.getName())
@@ -51,7 +51,7 @@ class TracerStatement implements InvocationHandler {
                 return trace(query, () -> method.invoke(statement, params));
             } else if ("getResultSet".equals(method.getName()) && resultSetListener != null) {
                 ResultSet rs = (ResultSet) method.invoke(statement, params);
-                return rs == null ? null : TracerResultSet.newInstance(rs, resultSetListener);
+                return rs == null ? null : TracerResultSet.newInstance(connection, statement, rs, resultSetListener);
             } else if ("equals".equals(method.getName())) {
                 Object ps = params[0];
                 return ps instanceof Proxy && proxy == ps;
