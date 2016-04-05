@@ -1,5 +1,6 @@
 package me.geso.jdbctracer;
 
+import lombok.NonNull;
 import me.geso.jdbctracer.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationHandler;
@@ -33,9 +34,9 @@ public class TracerConnection implements InvocationHandler {
      * @param rsl        Listener for ResultSet
      * @return Created connection object.
      */
-    public static Connection newInstance(Connection connection,
-                                  PreparedStatementListener psl,
-                                  ResultSetListener rsl) {
+    public static Connection newInstance(@NonNull Connection connection,
+                                  @NonNull PreparedStatementListener psl,
+                                  @NonNull ResultSetListener rsl) {
         return (Connection) Proxy.newProxyInstance(
                 TracerConnection.class.getClassLoader(),
                 new Class<?>[]{Connection.class},

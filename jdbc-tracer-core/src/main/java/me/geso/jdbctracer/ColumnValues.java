@@ -9,7 +9,11 @@ import java.util.stream.Collectors;
 
 @ToString
 class ColumnValues {
-    private Map<Integer, Object> columnValues = new HashMap<>();
+    private final Map<Integer, Object> columnValues;
+
+    ColumnValues() {
+        columnValues = new HashMap<>();
+    }
 
     void put(Integer key, Object value) {
         columnValues.put(key, value);

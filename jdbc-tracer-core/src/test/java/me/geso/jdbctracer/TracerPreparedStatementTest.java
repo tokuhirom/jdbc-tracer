@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Collections;
 
+import static java.sql.Types.ARRAY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -41,6 +42,21 @@ public class TracerPreparedStatementTest {
                 psl,
                 rsl
         );
+    }
+
+    @Test
+    public void setNull() throws Exception {
+        when(stmt.executeQuery()).thenReturn(rs);
+        this.target.setNull(1, ARRAY);
+        ResultSet rs = this.target.executeQuery();
+        assertThat(rs.toString())
+                .contains("TracerResultSet");
+
+        verify(psl, times(1))
+                .trace(eq(connection), anyLong(), eq("SELECT * FROM foo"), eq(Collections.singletonList(null)));
+
+        verify(stmt, times(1))
+                .executeQuery();
     }
 
     @Test

@@ -6,13 +6,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.lang.reflect.Proxy;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,10 +27,36 @@ public class TracerConnectionTest {
 
     @Before
     public void initTarget() {
-        this.target = (Connection) Proxy.newProxyInstance(
-                getClass().getClassLoader(),
-                new Class<?>[]{Connection.class},
-                new TracerConnection(this.connection, psl, rsl));
+        this.target = TracerConnection.newInstance(
+                this.connection,
+                psl, rsl
+        );
+    }
+
+    @Test
+    public void testToString() throws Exception {
+        String s = this.target.toString();
+        assertThat(s).contains("TracerConnection");
+        this.target.close();
+    }
+
+    @Test
+    public void close() throws SQLException {
+        when(this.connection.isClosed()).thenReturn(true);
+        this.target.close();
+        assertThat(this.target.isClosed()).isTrue();
+    }
+
+    @Test
+    public void exception() throws SQLException {
+        when(this.connection.isClosed()).thenThrow(
+                new MyException()
+        );
+        assertThatThrownBy(() -> this.target.isClosed())
+                .isInstanceOf(MyException.class);
+    }
+
+    public static class MyException extends RuntimeException {
     }
 
     @Test
