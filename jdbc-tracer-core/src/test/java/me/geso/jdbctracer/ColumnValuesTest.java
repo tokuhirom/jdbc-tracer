@@ -21,4 +21,11 @@ public class ColumnValuesTest {
         assertThat(columnValues.values())
                 .isEmpty();
     }
+
+    @Test
+    public void testToString() throws Exception {
+        ColumnValues columnValues = new ColumnValues();
+        assertThat(columnValues.toString())
+                .isEqualTo("ColumnValues{columnValues={}}");
+    }
 }

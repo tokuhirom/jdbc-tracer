@@ -35,6 +35,12 @@ class TracerStatement implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
         try {
+            // See https://github.com/mybatis/mybatis-3/issues/625
+            if ("equals".equals(method.getName())) {
+                Object ps = params[0];
+                return ps instanceof Proxy && proxy == ps;
+            }
+
             if (Object.class.equals(method.getDeclaringClass())) {
                 return method.invoke(this, params);
             }
@@ -52,11 +58,6 @@ class TracerStatement implements InvocationHandler {
             } else if ("getResultSet".equals(method.getName()) && resultSetListener != null) {
                 ResultSet rs = (ResultSet) method.invoke(statement, params);
                 return rs == null ? null : TracerResultSet.newInstance(connection, statement, rs, resultSetListener);
-            } else if ("equals".equals(method.getName())) {
-                Object ps = params[0];
-                return ps instanceof Proxy && proxy == ps;
-            } else if ("hashCode".equals(method.getName())) {
-                return proxy.hashCode();
             } else {
                 return method.invoke(statement, params);
             }

@@ -1,6 +1,5 @@
 package me.geso.jdbctracer;
 
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import me.geso.jdbctracer.util.ExceptionUtil;
 
@@ -11,7 +10,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-@EqualsAndHashCode
 @ToString
 class TracerResultSet implements InvocationHandler {
     private Connection connection;

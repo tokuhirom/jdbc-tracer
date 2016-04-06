@@ -65,6 +65,17 @@ public class TracerStatementTest {
     }
 
     @Test
+    public void testEquals() throws Exception {
+        assertThat(this.target.equals(3)).isFalse();
+        assertThat(this.target.equals(this.target)).isTrue();
+    }
+
+    @Test
+    public void testHashCode() throws Exception {
+        assertThat(this.target.hashCode()).isNotEqualTo(stmt.hashCode());
+    }
+
+    @Test
     public void getResultSet() throws Exception {
         when(stmt.getResultSet()).thenReturn(rs);
         ResultSet got = this.target.getResultSet();

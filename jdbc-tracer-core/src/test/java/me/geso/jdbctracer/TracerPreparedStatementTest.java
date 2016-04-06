@@ -93,4 +93,40 @@ public class TracerPreparedStatementTest {
                 .isInstanceOf(Proxy.class);
     }
 
+    @Test
+    public void withoutPSListener() throws Exception {
+        this.target = TracerPreparedStatement.newInstance(
+                connection, PreparedStatement.class,
+                stmt,
+                "SELECT * FROM foo",
+                null,
+                rsl
+        );
+
+        when(stmt.executeQuery()).thenReturn(rs);
+        ResultSet got = this.target.executeQuery();
+
+        assertThat(got)
+                .isInstanceOf(Proxy.class);
+        verify(stmt).executeQuery();
+    }
+
+    @Test
+    public void withoutRSListener() throws Exception {
+        this.target = TracerPreparedStatement.newInstance(
+                connection, PreparedStatement.class,
+                stmt,
+                "SELECT * FROM foo",
+                psl,
+                null
+        );
+
+        when(stmt.executeQuery()).thenReturn(rs);
+        ResultSet got = this.target.executeQuery();
+
+        assertThat(got)
+                .isSameAs(rs);
+        verify(stmt).executeQuery();
+    }
+
 }

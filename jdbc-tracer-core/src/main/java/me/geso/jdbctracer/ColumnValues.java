@@ -1,13 +1,10 @@
 package me.geso.jdbctracer;
 
-import lombok.ToString;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ToString
 class ColumnValues {
     private final Map<Integer, Object> columnValues;
 
@@ -21,6 +18,13 @@ class ColumnValues {
 
     void clear() {
         columnValues.clear();
+    }
+
+    @Override
+    public String toString() {
+        return "ColumnValues{" +
+                "columnValues=" + columnValues +
+                '}';
     }
 
     List<Object> values() {
