@@ -17,8 +17,7 @@ machine:
 
 dependencies:
   override:
-    - ./gradlew -v
-    - ./gradlew testClasses
+    - ./gradlew testClasses --stacktrace
 
 test:
   override:
