@@ -1,7 +1,5 @@
 rootProject.name = 'jdbc-tracer-root'
 
 include ':jdbc-tracer-core'
-include ':sample'
 
 project(':jdbc-tracer-core').projectDir = "$rootDir/jdbc-tracer-core" as File
-project(':sample').projectDir = "$rootDir/sample" as File
