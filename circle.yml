@@ -2,10 +2,6 @@ checkout:
   post:
     - chmod +x ./gradlew
 
-general:
-  artifacts:
-    - "*/build/reports/"
-
 machine:
   java:
     version: oraclejdk8
