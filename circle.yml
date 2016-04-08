@@ -2,6 +2,10 @@ checkout:
   post:
     - chmod +x ./gradlew
 
+general:
+  artifacts:
+    - "*/build/reports/"
+
 machine:
   timezone: Asia/Tokyo
   java:
